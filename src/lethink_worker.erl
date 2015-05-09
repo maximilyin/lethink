@@ -39,7 +39,7 @@ query(Pid, Query) ->
 
 -spec init([[{atom, any()}]]) -> {ok, #state{}}.
 init([Opts]) ->
-    Host = proplists:get_value(address, Opts, {127,0,0,1}),
+    Host = proplists:get_value(host, Opts, {127,0,0,1}),
     Port = proplists:get_value(port, Opts, 28015),
     Database = proplists:get_value(database, Opts, <<"test">>),
     AuthKey = proplists:get_value(auth_key, Opts, <<>>),
