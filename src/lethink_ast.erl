@@ -15,6 +15,8 @@
         table/2, table/3,
         insert/2, insert/3,
         get/2,
+        between/3,
+        filter/2,
         update/2,
         expr/1, expr/2,
         func/1,
@@ -208,6 +210,24 @@ get(Key, _) when is_list(Key) ->
     {error, <<"get key must be binary or number">>};
 get(_, _) ->
     {error, <<"get must follow table operator">>}.
+
+-spec between(binary() | number(), binary() | number(), #term{}) -> build_result().
+between(Value1, Value2, #term{ type = 'TABLE' } = Table) ->
+   #term {
+        type = 'BETWEEN',
+        args = [Table] ++ [expr(Value1)] ++ [expr(Value2)]
+    };
+between(_, _, _) ->
+    {error, "wrong format of data"}.
+
+-spec filter(tuple(), #term{}) -> build_result().
+filter(Value, #term{ type = 'TABLE' } = Table) when is_tuple(Value) ->
+    #term {
+        type = 'FILTER',
+        args = [Table] ++ [expr(Value)]
+    };
+filter(_, _) ->
+    {error, "wrong format of data"}.
 
 -spec update(lethink:document() | fun(), #term{}) -> build_result().
 update(Data, #term{ type = Type } = Selection) when
