@@ -16,6 +16,7 @@
         insert/2, insert/3,
         get/2,
         between/3,
+        between/4,
         filter/2,
         update/2,
         expr/1, expr/2,
@@ -107,6 +108,8 @@ table_option_term({datacenter, Value}) when is_binary(Value) ->
     term_assocpair(atom_to_binary(datacenter, utf8), Value);
 table_option_term({primary_key, Value}) when is_binary(Value) ->
     term_assocpair(atom_to_binary(primary_key, utf8), Value);
+table_option_term({index, Value}) when is_binary(Value) ->
+    term_assocpair(atom_to_binary(index, utf8), Value);
 table_option_term({cache_size, Value}) when is_integer(Value) ->
     term_assocpair(atom_to_binary(cache_size, utf8), Value).
 
@@ -218,7 +221,17 @@ between(Value1, Value2, #term{ type = 'TABLE' } = Table) ->
         args = [Table] ++ [expr(Value1)] ++ [expr(Value2)]
     };
 between(_, _, _) ->
-    {error, "wrong format of data"}.
+    {error, "between error format of data"}.
+
+-spec between(binary() | number(), binary() | number(), [lethink:table_options()], #term{}) -> build_result().
+between(Value1, Value2, Options, #term{ type = 'TABLE' } = Table) ->
+   #term {
+        type = 'BETWEEN',
+        args = [Table] ++ [expr(Value1)] ++ [expr(Value2)],
+        optargs = [table_option_term(Opt) || Opt <- Options]
+    };
+between(_, _, _, _) ->
+    {error, "between error format of data"}.
 
 -spec filter(tuple(), #term{}) -> build_result().
 filter(Value, #term{ type = 'TABLE' } = Table) when is_tuple(Value) ->
@@ -227,7 +240,7 @@ filter(Value, #term{ type = 'TABLE' } = Table) when is_tuple(Value) ->
         args = [Table] ++ [expr(Value)]
     };
 filter(_, _) ->
-    {error, "wrong format of data"}.
+    {error, "filter error format of data"}.
 
 -spec update(lethink:document() | fun(), #term{}) -> build_result().
 update(Data, #term{ type = Type } = Selection) when
